@@ -5,6 +5,8 @@ import ShinyText from './components/ShinyText/ShinyText'
 import BlurText from './components/BlurText/BlurText';
 import SendOutlinedIcon from '@mui/icons-material/SendOutlined';
 import TypingBubble from './components/TypingBubble/TypingBubble';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm'; 
 
 function OmnIA() {
 
@@ -81,14 +83,17 @@ function OmnIA() {
     <>
       <div className='header-container'>
         <div className='header-text'>
-          <h1>OmnIA</h1>
-          <h1>{novaConfig.nome}</h1>
-          <p>Sua parceira de dados.</p>
+          <ShinyText
+            text="OmnIA"
+            disabled={false}
+            speed={2}
+            className='header-nova'
+          />
         </div>
       </div>
 
-      <section className='main-container'>
-        <div className='description-container'>
+      <section className={`main-container ${chatHistory.length === 0 ? 'initial-layout' : ''}`}>
+        <div className={`description-container ${chatHistory.length > 0 ? 'hidden' : ''}`}>
           <BlurText
             text="OmnIA, sua companheira virtual agora de cara nova."
             delay={220}
@@ -98,7 +103,7 @@ function OmnIA() {
           />
 
           <ShinyText
-            text="Escreva algo para conversar com a Nova."
+            text="Pergunte algo para a Nova."
             disabled={false}
             speed={3}
             className='custom-class'
@@ -106,17 +111,30 @@ function OmnIA() {
         </div>
 
         <div className="chat-display" ref={chatContainerRef}>
-        {chatHistory.map((msg, index) => (
-          <div key={index} className={`message-bubble ${msg.sender}`}>
-            <p dangerouslySetInnerHTML={{ __html: msg.text.replace(/\n/g, '<br />') }} />
-          </div>
-        ))}
-        {isLoading && (
-          <div className="message-bubble nova">
-            <TypingBubble />
-          </div>
-        )}
-      </div>
+          {chatHistory.map((msg, index) => (
+            <div key={index} className={`message-bubble ${msg.sender}`}>
+              {msg.sender === 'nova' ? (
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {msg.text}
+                </ReactMarkdown>
+              ) : (
+                <p dangerouslySetInnerHTML={{ __html: msg.text.replace(/\n/g, '<br />') }} />
+              )}
+            </div>
+          ))}
+          {isLoading && (
+            <div className="message-bubble nova">
+              <TypingBubble /> 
+              
+              <ShinyText
+            text="A nova está digitando..."
+            disabled={false}
+            speed={1}
+            className='typing-text'
+          />
+            </div>
+          )}
+        </div>
 
 
         <div className='chat-container'>
@@ -127,7 +145,7 @@ function OmnIA() {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={isLoading ? "Aguarde a Nova responder..." : "Converse com a Nova..."}
+            placeholder={isLoading ? "Aguarde a Nova responder..." : "Pergunte alguma coisa"}
             disabled={isLoading}
             name="chatbox" 
             id="chatbox" 
